@@ -107,7 +107,7 @@ export function initializeGemini(apiKey) {
 
   genAI = new GoogleGenerativeAI(apiKey);
   model = genAI.getGenerativeModel({
-    model: "gemini-1.5-pro",
+    model: "gemini-2.5-flash",
     tools: [{ functionDeclarations }],
   });
 

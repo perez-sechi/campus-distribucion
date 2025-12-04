@@ -155,6 +155,49 @@ function App() {
     }
   }
 
+  // Función auxiliar para calcular una posición libre en una planta
+  const calcularPosicionLibre = (planta, ocupacionNuevoEquipo) => {
+    if (planta.equipos.length === 0) {
+      return 20 // Primera posición si no hay equipos
+    }
+
+    // Ancho aproximado de la planta (asumimos 600px como base)
+    const anchoPlanta = 600
+    const margen = 10
+
+    // Calcular posiciones ocupadas
+    const posicionesOcupadas = planta.equipos.map(equipo => {
+      const anchoEquipo = (equipo.ocupacion / planta.capacidad) * anchoPlanta
+      return {
+        inicio: equipo.posicionX,
+        fin: equipo.posicionX + anchoEquipo
+      }
+    }).sort((a, b) => a.inicio - b.inicio)
+
+    // Ancho del nuevo equipo
+    const anchoNuevo = (ocupacionNuevoEquipo / planta.capacidad) * anchoPlanta
+
+    // Intentar colocar al inicio
+    if (posicionesOcupadas[0].inicio >= 20 + anchoNuevo + margen) {
+      return 20
+    }
+
+    // Buscar un hueco entre equipos existentes
+    for (let i = 0; i < posicionesOcupadas.length - 1; i++) {
+      const finActual = posicionesOcupadas[i].fin
+      const inicioSiguiente = posicionesOcupadas[i + 1].inicio
+      const espacioDisponible = inicioSiguiente - finActual
+
+      if (espacioDisponible >= anchoNuevo + margen * 2) {
+        return finActual + margen
+      }
+    }
+
+    // Colocar después del último equipo
+    const ultimoEquipo = posicionesOcupadas[posicionesOcupadas.length - 1]
+    return ultimoEquipo.fin + margen
+  }
+
   // Implementación de funciones llamables desde Gemini
   const moverEquipoAPlantaPorNombre = (nombreEquipo, nombreEdificio, numeroPlanta) => {
     // Buscar el equipo (puede estar en disponibles o en alguna planta)
@@ -199,8 +242,11 @@ function App() {
       return { success: false, message: `No se encontró la planta ${numeroPlanta} en ${nombreEdificio}` }
     }
 
+    // Calcular posición libre automáticamente
+    const posicionLibre = calcularPosicionLibre(planta, equipoEncontrado.ocupacion)
+
     // Mover el equipo
-    moverEquipo(equipoEncontrado.id, origenPlantaId, planta.id, 20)
+    moverEquipo(equipoEncontrado.id, origenPlantaId, planta.id, posicionLibre)
 
     return {
       success: true,
@@ -277,7 +323,8 @@ function App() {
           for (let planta of edificio.plantas) {
             const ocupacionActual = planta.equipos.reduce((sum, e) => sum + e.ocupacion, 0)
             if (ocupacionActual + equipo.ocupacion <= planta.capacidad) {
-              moverEquipo(equipo.id, 'disponibles', planta.id, 20)
+              const posicionLibre = calcularPosicionLibre(planta, equipo.ocupacion)
+              moverEquipo(equipo.id, 'disponibles', planta.id, posicionLibre)
               equiposColocados++
               colocado = true
               break
@@ -295,7 +342,8 @@ function App() {
           for (let planta of edificio.plantas) {
             const ocupacionActual = planta.equipos.reduce((sum, e) => sum + e.ocupacion, 0)
             if (ocupacionActual + equipo.ocupacion <= planta.capacidad) {
-              moverEquipo(equipo.id, 'disponibles', planta.id, 20)
+              const posicionLibre = calcularPosicionLibre(planta, equipo.ocupacion)
+              moverEquipo(equipo.id, 'disponibles', planta.id, posicionLibre)
               equiposColocados++
               colocado = true
               break

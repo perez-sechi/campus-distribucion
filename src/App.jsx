@@ -51,14 +51,16 @@ function App() {
 
   // Función para mover un equipo entre plantas o desde/hacia disponibles
   const moverEquipo = (equipoId, origenPlantaId, destinoPlantaId, posicionX) => {
+    // Actualizar edificios primero
     setEdificios(prevEdificios => {
       const nuevosEdificios = JSON.parse(JSON.stringify(prevEdificios))
       let equipoMovido = null
 
       // Si viene de equipos disponibles
       if (origenPlantaId === 'disponibles') {
+        // Buscar en disponibles usando el estado actual (closure)
         equipoMovido = equiposDisponibles.find(e => e.id === equipoId)
-        setEquiposDisponibles(prev => prev.filter(e => e.id !== equipoId))
+        if (!equipoMovido) return prevEdificios
       } else {
         // Buscar y remover el equipo de su planta de origen
         for (let edificio of nuevosEdificios) {
@@ -76,9 +78,16 @@ function App() {
 
       if (!equipoMovido) return prevEdificios
 
-      // Si el destino es disponibles
+      // Si el destino es disponibles, manejar más tarde
       if (destinoPlantaId === 'disponibles') {
-        setEquiposDisponibles(prev => [...prev, equipoMovido])
+        // Actualizar disponibles después
+        setEquiposDisponibles(prev => {
+          // Verificar si ya existe
+          if (!prev.find(e => e.id === equipoMovido.id)) {
+            return [...prev, equipoMovido]
+          }
+          return prev
+        })
         return nuevosEdificios
       }
 
@@ -96,9 +105,19 @@ function App() {
               ...equipoMovido,
               posicionX: posicionX
             })
+
+            // Si vino de disponibles, removerlo de ahí
+            if (origenPlantaId === 'disponibles') {
+              setEquiposDisponibles(prev => prev.filter(e => e.id !== equipoId))
+            }
           } else {
             // No hay capacidad, devolver el equipo a disponibles
-            setEquiposDisponibles(prev => [...prev, equipoMovido])
+            setEquiposDisponibles(prev => {
+              if (!prev.find(e => e.id === equipoMovido.id)) {
+                return [...prev, equipoMovido]
+              }
+              return prev
+            })
             alert(`No hay suficiente capacidad en la planta. Capacidad: ${plantaDestino.capacidad}, Ocupación actual: ${ocupacionActual}, Se necesita: ${equipoMovido.ocupacion}`)
           }
           break

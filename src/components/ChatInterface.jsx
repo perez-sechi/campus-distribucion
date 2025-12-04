@@ -88,6 +88,8 @@ function ChatInterface({ edificios, equiposDisponibles, onExecuteAction }) {
         for (const call of response.functionCalls) {
           const result = await executeFunctionCall(call);
           results.push(result);
+          // Pequeño delay entre llamadas para permitir que React actualice el estado
+          await new Promise(resolve => setTimeout(resolve, 50));
         }
 
         // Añadir respuesta del asistente

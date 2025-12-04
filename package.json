@@ -2,7 +2,7 @@
   "name": "campus-distribucion",
   "version": "1.0.0",
   "type": "module",
-  "homepage": "https://<TU-USUARIO>.github.io/campus-distribucion",
+  "homepage": "https://perez-sechi.github.io/campus-distribucion",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

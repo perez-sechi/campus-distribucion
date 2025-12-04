@@ -2,6 +2,16 @@
 
 Aplicación React para gestionar la distribución de equipos de trabajo en diferentes plantas de edificios dentro de un campus.
 
+---
+
+## 🚀 ¿Listo para Desplegar en GitHub Pages?
+
+**👉 [START-HERE.md](START-HERE.md) - Guía de deployment en 5 minutos**
+
+El proyecto está completamente empaquetado y listo para GitHub Pages. Solo necesitas configurar tu usuario de GitHub y la API key.
+
+---
+
 ## Características
 
 - **Visualización de Campus**: Edificios dispuestos en grid (máximo 2 por fila)
@@ -110,8 +120,38 @@ Puedes modificar los datos iniciales en `src/App.jsx`:
 - HTML5 Drag and Drop API
 - CSS3 con Grid y Flexbox
 
+## Deployment a GitHub Pages
+
+### Método Rápido (GitHub Actions - Automático)
+
+1. **Crear repositorio en GitHub y subir el código**
+2. **Configurar API Key como Secret**:
+   - Settings > Secrets and variables > Actions
+   - Nuevo secret: `VITE_GEMINI_API_KEY`
+3. **Habilitar GitHub Pages**:
+   - Settings > Pages > Source: GitHub Actions
+4. **Actualizar `package.json`**:
+   ```json
+   "homepage": "https://TU-USUARIO.github.io/campus-distribucion"
+   ```
+5. **Hacer push a `main`** y el deployment será automático
+
+### Método Manual
+
+```bash
+# Actualizar homepage en package.json
+# Luego ejecutar:
+npm run deploy
+```
+
+📚 **Documentación completa**: Ver [DEPLOY.md](DEPLOY.md) para instrucciones detalladas
+
+⚠️ **Seguridad**: Ver [SECURITY.md](SECURITY.md) para consideraciones de seguridad de la API key
+
 ## Notas de Seguridad
 
 - El archivo `.env` está excluido de git para proteger tu API key
 - Nunca compartas tu API key de Gemini públicamente
-- La API key se usa solo en el cliente (apropiado para desarrollo, para producción considera usar un backend)
+- **⚠️ IMPORTANTE**: En GitHub Pages, la API key será visible en el código del navegador
+- Configura restricciones de dominio y límites de cuota en Google Cloud Console
+- Para producción profesional, considera usar un backend (ver SECURITY.md)

@@ -15,7 +15,7 @@ dist-ssr
 # Environment variables
 .env
 .env.local
-.env.production
+# .env.production is allowed (contains only public backend URL, no secrets)
 .env.production.local
 
 # Editor directories and files

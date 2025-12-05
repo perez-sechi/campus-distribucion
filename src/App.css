@@ -472,6 +472,45 @@ body {
   cursor: not-allowed;
 }
 
+/* Botón de voz */
+.chat-voice-button {
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+  min-width: 50px;
+  white-space: nowrap;
+}
+
+.chat-voice-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(245, 87, 108, 0.4);
+}
+
+.chat-voice-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-voice-button.recording {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 87, 108, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(245, 87, 108, 0);
+  }
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .main-content {

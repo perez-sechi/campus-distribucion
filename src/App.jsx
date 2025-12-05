@@ -106,6 +106,9 @@ function App() {
               posicionX: posicionX
             })
 
+            // COMPACTAR: Reordenar todos los equipos desde el inicio
+            compactarEquiposEnPlanta(plantaDestino)
+
             // Si vino de disponibles, removerlo de ahí
             if (origenPlantaId === 'disponibles') {
               setEquiposDisponibles(prev => prev.filter(e => e.id !== equipoId))
@@ -121,6 +124,17 @@ function App() {
             alert(`No hay suficiente capacidad en la planta. Capacidad: ${plantaDestino.capacidad}, Ocupación actual: ${ocupacionActual}, Se necesita: ${equipoMovido.ocupacion}`)
           }
           break
+        }
+      }
+
+      // Compactar también la planta de origen si un equipo fue removido
+      if (origenPlantaId !== 'disponibles') {
+        for (let edificio of nuevosEdificios) {
+          const plantaOrigen = edificio.plantas.find(p => p.id === origenPlantaId)
+          if (plantaOrigen) {
+            compactarEquiposEnPlanta(plantaOrigen)
+            break
+          }
         }
       }
 
@@ -175,46 +189,47 @@ function App() {
   }
 
   // Función auxiliar para calcular una posición libre en una planta
-  const calcularPosicionLibre = (planta, ocupacionNuevoEquipo) => {
+  // Los equipos se colocan siempre desde el inicio, uno al lado del otro, SIN espacios
+  const calcularPosicionLibre = (planta, ocupacionNuevoEquipo, anchoPlantaPx = 400) => {
     if (planta.equipos.length === 0) {
-      return 20 // Primera posición si no hay equipos
+      return 0 // Empezar desde el inicio (posición 0)
     }
 
-    // Ancho aproximado de la planta (asumimos 600px como base)
-    const anchoPlanta = 600
-    const margen = 10
+    // Calcular la posición final del último equipo
+    // El ancho del equipo es un porcentaje que se aplica al ancho real de la planta en píxeles
+    let posicionFinalMaxima = 0
 
-    // Calcular posiciones ocupadas
-    const posicionesOcupadas = planta.equipos.map(equipo => {
-      const anchoEquipo = (equipo.ocupacion / planta.capacidad) * anchoPlanta
-      return {
-        inicio: equipo.posicionX,
-        fin: equipo.posicionX + anchoEquipo
+    planta.equipos.forEach(equipo => {
+      const anchoPorcentaje = (equipo.ocupacion / planta.capacidad) * 100
+      const anchoEquipoPx = (anchoPorcentaje / 100) * anchoPlantaPx
+      const finEquipo = equipo.posicionX + anchoEquipoPx
+      if (finEquipo > posicionFinalMaxima) {
+        posicionFinalMaxima = finEquipo
       }
-    }).sort((a, b) => a.inicio - b.inicio)
+    })
 
-    // Ancho del nuevo equipo
-    const anchoNuevo = (ocupacionNuevoEquipo / planta.capacidad) * anchoPlanta
+    // Colocar el nuevo equipo inmediatamente después del último (sin margen)
+    return posicionFinalMaxima
+  }
 
-    // Intentar colocar al inicio
-    if (posicionesOcupadas[0].inicio >= 20 + anchoNuevo + margen) {
-      return 20
-    }
+  // Función para compactar todos los equipos de una planta desde el inicio
+  // Los equipos quedan completamente pegados, sin espacios entre ellos
+  const compactarEquiposEnPlanta = (planta, anchoPlantaPx = 400) => {
+    if (planta.equipos.length === 0) return
 
-    // Buscar un hueco entre equipos existentes
-    for (let i = 0; i < posicionesOcupadas.length - 1; i++) {
-      const finActual = posicionesOcupadas[i].fin
-      const inicioSiguiente = posicionesOcupadas[i + 1].inicio
-      const espacioDisponible = inicioSiguiente - finActual
+    let posicionActual = 0 // Empezar desde el principio
 
-      if (espacioDisponible >= anchoNuevo + margen * 2) {
-        return finActual + margen
-      }
-    }
+    // Ordenar equipos por posición actual para mantener el orden visual
+    const equiposOrdenados = [...planta.equipos].sort((a, b) => a.posicionX - b.posicionX)
 
-    // Colocar después del último equipo
-    const ultimoEquipo = posicionesOcupadas[posicionesOcupadas.length - 1]
-    return ultimoEquipo.fin + margen
+    // Reposicionar cada equipo desde el inicio, completamente pegados
+    equiposOrdenados.forEach(equipo => {
+      equipo.posicionX = posicionActual
+      // Calcular ancho en píxeles (el componente Equipo usa width en %)
+      const anchoPorcentaje = (equipo.ocupacion / planta.capacidad) * 100
+      const anchoEquipoPx = (anchoPorcentaje / 100) * anchoPlantaPx
+      posicionActual += anchoEquipoPx // Sin margen, completamente pegados
+    })
   }
 
   // Implementación de funciones llamables desde Gemini

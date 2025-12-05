@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: campus-distribucion-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false  # Configurar manualmente en Render dashboard
+      - key: FRONTEND_URL
+        sync: false  # Configurar manualmente en Render dashboard

@@ -8,10 +8,34 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
+// Lista de orígenes permitidos
+const allowedOrigins = [
+  'https://perez-sechi.github.io',
+  'https://perez-sechi.com',
+  'https://www.perez-sechi.com',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
+// Si hay FRONTEND_URL configurada, añadirla también
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
+// Middleware CORS con múltiples orígenes
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*', // En producción, especificar el dominio exacto
-  methods: ['POST', 'GET'],
+  origin: function(origin, callback) {
+    // Permitir requests sin origin (como curl o Postman)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.some(allowed => origin.startsWith(allowed.replace(/\/$/, '')))) {
+      return callback(null, true);
+    }
+    
+    console.log('CORS blocked origin:', origin);
+    return callback(new Error('Not allowed by CORS'), false);
+  },
+  methods: ['POST', 'GET', 'OPTIONS'],
   credentials: true
 }));
 // Aumentar límite para soportar audio en base64 (hasta 10MB)
